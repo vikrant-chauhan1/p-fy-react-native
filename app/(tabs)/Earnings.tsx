@@ -20,7 +20,7 @@ const EarningsScreen=()=>{
       const earnings = await getEarnings();
       console.log(earnings);
       setEarningsList(earnings);
-      GetTotalEarnings();
+      GetTotalEarnings(earnings);
     } catch (error) {
       console.error("error laoding earnings : ",error)
       
@@ -33,8 +33,12 @@ const EarningsScreen=()=>{
     setDescription("");
     loadEarnings();
   };
-  const GetTotalEarnings= async()=>{
-    const total =earningsList.reduce((sum,earning)=>sum+(earning.amount | 0),0);
+  const GetTotalEarnings= async(earningsData :any[])=>{
+    if (!Array.isArray(earningsData) || earningsData.length === 0) {
+      setTotalEarnings(0);
+      return;
+    }
+    const total =earningsData.reduce((sum,earning)=>sum+(earning.amount | 0),0);
     setTotalEarnings(total)
   }
 
