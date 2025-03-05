@@ -84,4 +84,4 @@ const EarningsScreen=()=>{
     </View>
   );
 }
-export default EarningsScreen;;
+export default EarningsScreen;

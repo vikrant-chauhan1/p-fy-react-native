@@ -44,7 +44,7 @@ export const addEarnings = async (amount: number, description: string) => {
         console.log("Earnings added successfully");
     } catch (error) {
         console.error("Error adding earnings:", error);
-        throw error; // Optional: depends on your error handling needs
+        throw error; 
     } 
 };
 
@@ -67,3 +67,29 @@ export const getEarnings = async () => {
     }
 };
 
+export const addExpenses = async(amount :number,category :string,description:string)=>{
+    const db = await getDB();
+    try {
+        await db.runAsync(`INSERT INTO expenses (amount,category,description) VALUES(?,?,?)`,[amount,category,description]);
+        console.log("Expenses added successfully")
+        
+    } catch (error) {
+        console.error("Failed to add earnings",error);
+        throw error;
+    }
+}
+
+export const getExpenses = async()=>{
+    const db = await getDB();
+    try {
+        const result = await db.getAllAsync(`SELECT * FROM expenses;`)
+        console.log(result);
+        console.log("result is above")
+        return result;
+        
+    } catch (error) {
+        console.error("Error fetching expenses",error);
+        throw error;
+        
+    }
+}
