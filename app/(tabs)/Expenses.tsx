@@ -1,3 +1,5 @@
+"use client"
+
 import { useState, useEffect } from "react"
 import {
   View,
@@ -14,8 +16,9 @@ import {
   Image,
 } from "react-native"
 import { Picker } from "@react-native-picker/picker"
+import { MaterialIcons } from "@expo/vector-icons"
 import { addExpenses, getExpenses, deleteExpense, createTables } from "../../db/database"
-import ExpenseCar from "../../assets/images/ExpenseCar.png"
+import expenseCatCrying from "../../assets/images/expenseCatCrying.png"
 
 const ExpensesScreen = () => {
   const [expensesList, setExpensesList] = useState<any[]>([])
@@ -33,7 +36,8 @@ const ExpensesScreen = () => {
   const loadExpenses = async () => {
     try {
       const expenses = await getExpenses()
-      setExpensesList(expenses)
+      const sortedExpenses = Array.isArray(expenses) ? expenses.sort((a: any, b: any) => b.id - a.id) : []
+      setExpensesList(sortedExpenses)
       calculateTotalExpenses(expenses)
     } catch (error) {
       console.error("Error loading expenses:", error)
@@ -46,8 +50,8 @@ const ExpensesScreen = () => {
   }
 
   const handleAddExpenses = async () => {
-    if (!amount || isNaN(Number.parseFloat(amount))) {
-      alert("Please enter a valid amount")
+    if (!amount || !description || isNaN(Number.parseFloat(amount))) {
+      alert("Please enter a valid amount and description")
       return
     }
     if (!category || (category !== "Compulsory" && category !== "Miscellaneous")) {
@@ -60,7 +64,7 @@ const ExpensesScreen = () => {
       setAmount("")
       setDescription("")
       setCategory("Compulsory")
-      setShowImage(true) // Show image when expense is added
+      setShowImage(true)
       loadExpenses()
     } catch (error) {
       console.error("Failed to add expenses:", error)
@@ -100,7 +104,7 @@ const ExpensesScreen = () => {
             />
 
             <TextInput
-              placeholder="Description (optional)"
+              placeholder="Description"
               value={description}
               onChangeText={setDescription}
               style={styles.input}
@@ -112,7 +116,6 @@ const ExpensesScreen = () => {
                 selectedValue={category}
                 onValueChange={(itemValue) => setCategory(itemValue)}
                 style={styles.picker}
-                dropdownIconColor="#666"
               >
                 <Picker.Item label="Compulsory" value="Compulsory" />
                 <Picker.Item label="Miscellaneous" value="Miscellaneous" />
@@ -123,25 +126,49 @@ const ExpensesScreen = () => {
               <Text style={styles.addButtonText}>Add Expense</Text>
             </TouchableOpacity>
 
-            {/* Display the image only when an expense is added */}
-            {showImage && <Image source={ExpenseCar} style={styles.image} />}
+            {showImage && <Image source={expenseCatCrying} style={styles.image} />}
           </View>
 
+          {/* Improved Expense List UI */}
+          <View style={styles.expenseListHeader}>
+            <Text style={[styles.columnHeader, { flex: 0.3 }]}>Amount</Text>
+            <Text style={[styles.columnHeader, { flex: 0.55 }]}>Details & Date</Text>
+            <Text style={[styles.columnHeader, { flex: 0.15 }]}>Action</Text>
+          </View>
           <FlatList
             data={expensesList}
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => (
-              <View style={styles.expenseItem}>
-                <Text style={styles.expenseText}>
-                  {item.category}: ₹{item.amount.toFixed(2)}
-                </Text>
-                <TouchableOpacity onPress={() => handleDeleteExpense(item.id)} style={styles.deleteButton}>
-                  <Text style={styles.deleteText}>Delete</Text>
+              <View
+                style={[
+                  styles.expenseItem,
+                  item.category === "Compulsory" ? styles.compulsoryExpense : styles.miscExpense,
+                ]}
+              >
+                <View style={styles.amountSection}>
+                  <Text style={styles.expenseAmount}>₹{item.amount.toFixed(2)}</Text>
+                </View>
+
+                <View style={styles.detailsSection}>
+                  <Text style={styles.expenseDescription} numberOfLines={1} ellipsizeMode="tail">
+                    {item.description}
+                  </Text>
+                  <View style={styles.metaDataRow}>
+                    <View style={styles.categoryBadge}>
+                      <Text style={styles.categoryText}>{item.category}</Text>
+                    </View>
+                    <Text style={styles.expenseTime}>{new Date(item.date).toLocaleDateString()}</Text>
+
+                  </View>
+                </View>
+
+                <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteExpense(item.id)}>
+                  <MaterialIcons name="delete" size={20} color="#fff" />
                 </TouchableOpacity>
               </View>
             )}
-            nestedScrollEnabled={true} // ✅ Allows FlatList to work inside ScrollView
-            scrollEnabled={false} // ✅ Prevents FlatList from scrolling separately
+            nestedScrollEnabled={true}
+            scrollEnabled={false}
           />
         </ScrollView>
       </KeyboardAvoidingView>
@@ -157,22 +184,23 @@ const styles = StyleSheet.create({
   },
   header: {
     marginBottom: 20,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 16,
+    elevation: 3,
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 10,
+    color: "#333",
   },
   totalContainer: {
-    backgroundColor: "#fff",
+    backgroundColor: "#f8f8f8",
     padding: 10,
     borderRadius: 10,
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
   },
   totalLabel: {
     fontSize: 16,
@@ -199,10 +227,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 10,
   },
-  picker: {
-    height: 50,
-    width: "100%",
-  },
   addButton: {
     backgroundColor: "#ff5a5f",
     padding: 12,
@@ -214,37 +238,92 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  expenseListHeader: {
+    flexDirection: "row",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: "#f0f0f0",
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  columnHeader: {
+    fontWeight: "bold",
+    color: "#666",
+    fontSize: 14,
+  },
+  expenseItem: {
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 10,
+    elevation: 2,
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  compulsoryExpense: {
+    borderLeftWidth: 4,
+    borderLeftColor: "#ff5a5f",
+  },
+  miscExpense: {
+    borderLeftWidth: 4,
+    borderLeftColor: "#4a90e2",
+  },
+  amountSection: {
+    flex: 0.3,
+    justifyContent: "center",
+  },
+  detailsSection: {
+    flex: 0.55,
+    justifyContent: "center",
+  },
+  expenseAmount: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  expenseDescription: {
+    fontSize: 15,
+    marginBottom: 4,
+    color: "#333",
+  },
+  expenseTime: {
+    fontSize: 12,
+    color: "#666",
+    fontWeight: "500",
+    backgroundColor: "#f8f8f8",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  deleteButton: {
+    backgroundColor: "#ff5a5f",
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   image: {
     width: 200,
     height: 200,
     alignSelf: "center",
     marginTop: 10,
   },
-  expenseItem: {
+  metaDataRow: {
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "space-between",
-    padding: 10,
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    marginBottom: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
+    marginTop: 4,
   },
-  expenseText: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  deleteButton: {
-    backgroundColor: "#ff5a5f",
-    padding: 5,
-    borderRadius: 5,
-  },
-  deleteText: {
-    color: "#fff",
-    fontWeight: "bold",
+  categoryBadge: {
+    backgroundColor: "#f0f0f0",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 12,
+    alignSelf: "flex-start",
   },
 })
 
 export default ExpensesScreen
+

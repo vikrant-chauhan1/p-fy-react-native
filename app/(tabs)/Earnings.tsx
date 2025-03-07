@@ -11,14 +11,17 @@ import {
   StyleSheet,
   Alert,
   ScrollView,
+  Image,
 } from "react-native";
 import { addEarnings, getEarnings, createTables, deleteEarning } from "../../db/database";
+import ExpenseCar from "../../assets/images/ExpenseCar.png"
 
 const EarningsScreen = () => {
   const [amount, setAmount] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [earningsList, setEarningsList] = useState<any[]>([]);
   const [totalEarnings, setTotalEarnings] = useState<number>(0);
+  const [showImage, setShowImage] = useState<boolean>(false)
 
   useEffect(() => {
     createTables();
@@ -28,7 +31,9 @@ const EarningsScreen = () => {
   const loadEarnings = async () => {
     try {
       const earnings = await getEarnings();
-      setEarningsList(earnings);
+      const sortedEarnings = Array.isArray(earnings)
+      ? earnings.sort((a:any,b:any)=>b.id - a.id) : [];
+      setEarningsList(sortedEarnings);
       console.log(earnings)
       getTotalEarnings(earnings);
     } catch (error) {
@@ -37,8 +42,8 @@ const EarningsScreen = () => {
   };
 
   const handleAddEarnings = async () => {
-    if (!amount || isNaN(parseFloat(amount))) {
-      Alert.alert("Invalid Input", "Please enter a valid amount.");
+    if (!amount || !description || isNaN(parseFloat(amount))) {
+      Alert.alert("Invalid Input", "Please enter a valid amount and description");
       return;
     }
     try {
@@ -46,6 +51,7 @@ const EarningsScreen = () => {
       setAmount("");
       setDescription("");
       loadEarnings();
+      setShowImage(true);
     } catch (error) {
       console.error("Failed to add earnings", error);
     }
@@ -112,7 +118,10 @@ const EarningsScreen = () => {
             <TouchableOpacity style={styles.addButton} onPress={handleAddEarnings} activeOpacity={0.8}>
               <Text style={styles.addButtonText}>Add Earning</Text>
             </TouchableOpacity>
+
+            {showImage && <Image source={ExpenseCar} style={styles.image} />}
           </View>
+          
   
           <View style={styles.listContainer}>
             <FlatList
@@ -280,6 +289,12 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     paddingBottom: 20, 
+  },
+  image: {
+    width: 200,
+    height: 200,
+    alignSelf: "center",
+    marginTop: 10,
   },
   
 });
