@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from "react-native";
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, ScrollView,RefreshControl } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { createTables, getEarnings, getExpenses } from "../../db/database";
 import { MaterialCommunityIcons, Ionicons, FontAwesome5 } from "@expo/vector-icons";
 
-const { width } = Dimensions.get("window");
-const cardWidth = width * 0.85;
+
+
 
 type Expense = {
   id: number;
@@ -20,6 +20,7 @@ const HomeScreen = () => {
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [recentExpenses, setRecentExpenses] = useState<Expense[]>([]);
   const [activeTab, setActiveTab] = useState("summary");
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     const setupDB = async () => {
@@ -45,10 +46,16 @@ const HomeScreen = () => {
         expenses.reduce((sum: number, expense: any) => sum + (expense.amount ?? 0), 0)
       );
       const sortedRecentExpenses = Array.isArray(expenses) ? expenses.sort((a: any, b: any) => b.id - a.id) : [];
-      setRecentExpenses(sortedRecentExpenses.slice(0, 20)); // Limit to 5 most recent
+      setRecentExpenses(sortedRecentExpenses.slice(0, 50)); // Limit to 50 most recent
     } catch (error) {
       console.error("Error loading data:", error);
+    }finally {
+      setRefreshing(false); 
     }
+  };
+  const onRefresh = () => {
+    setRefreshing(true);
+    loadData();
   };
 
   const getCategoryIcon = (category: string) => {
@@ -73,8 +80,9 @@ const HomeScreen = () => {
       start={{ x: 0, y: 0 }} 
       end={{ x: 1, y: 1 }} 
       style={styles.container}
+      
     >
-      <View style={styles.header}>
+      <View style={styles.header} >
         <Text style={styles.headerTitle}>Finance Dashboard</Text>
         <View style={styles.tabContainer}>
           <TouchableOpacity 
@@ -92,7 +100,7 @@ const HomeScreen = () => {
         </View>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         {activeTab === "summary" ? (
           <>
             <View style={styles.balanceCard}>

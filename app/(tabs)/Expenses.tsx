@@ -54,7 +54,7 @@ const ExpensesScreen = () => {
       alert("Please enter a valid amount and description")
       return
     }
-    if (!category || (category !== "Compulsory" && category !== "Miscellaneous")) {
+    if (!category || (category !== "Compulsory" && category !== "Miscellaneous" && category !== "Food" && category !=="Grocery")) {
       alert("Invalid category selected")
       return
     }
@@ -119,6 +119,8 @@ const ExpensesScreen = () => {
               >
                 <Picker.Item label="Compulsory" value="Compulsory" />
                 <Picker.Item label="Miscellaneous" value="Miscellaneous" />
+                <Picker.Item label="Food" value="Food" />
+                <Picker.Item label="Grocery" value="Grocery" />
               </Picker>
             </View>
 

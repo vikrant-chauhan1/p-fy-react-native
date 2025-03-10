@@ -19,10 +19,10 @@ export const createTables = async () => {
         `);
         
         await db.execAsync(`
-            CREATE TABLE IF NOT EXISTS expenses (
+            CREATE TABLE IF NOT EXISTS expenses_new (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 amount REAL NOT NULL,
-                category TEXT CHECK(category IN ('Compulsory', 'Miscellaneous')) NOT NULL,
+                category TEXT CHECK(category IN ('Compulsory', 'Miscellaneous','Food','Grocery')) NOT NULL,
                 description TEXT,
                 date TEXT DEFAULT CURRENT_TIMESTAMP
             );
@@ -87,7 +87,7 @@ export const deleteEarning= async(id:number)=>{
 export const addExpenses = async(amount :number,category :string,description:string)=>{
     const db = await getDB();
     try {
-        await db.runAsync(`INSERT INTO expenses (amount,category,description) VALUES(?,?,?)`,[amount,category,description]);
+        await db.runAsync(`INSERT INTO expenses_new (amount,category,description) VALUES(?,?,?)`,[amount,category,description]);
         console.log("Expenses added successfully")
         
     } catch (error) {
@@ -99,7 +99,7 @@ export const addExpenses = async(amount :number,category :string,description:str
 export const getExpenses = async()=>{
     const db = await getDB();
     try {
-        const result = await db.getAllAsync(`SELECT * FROM expenses;`)
+        const result = await db.getAllAsync(`SELECT * FROM expenses_new;`)
         console.log(result);
         console.log("result is above")
         return result;
@@ -114,7 +114,7 @@ export const getExpenses = async()=>{
 export const deleteExpense = async(id:number)=>{
     const db = await getDB();
     try {
-        await db.runAsync(`DELETE FROM expenses WHERE id=(?)`,[id]);
+        await db.runAsync(`DELETE FROM expenses_new WHERE id=(?)`,[id]);
         console.log("expense deleted successfully")
     } catch (error) {
         console.log(error)
