@@ -72,7 +72,7 @@ export const getEarnings = async () => {
 export const deleteEarning= async(id:number)=>{
     const db = await getDB();
     try {
-        await db.runAsync( `DELETE FROM earnings WHERE id=(?)`,[id]);
+        await db.runAsync( `DELETE FROM earnings_new WHERE id=(?)`,[id]);
         console.log("Earning deleted sucessfully")
     } catch (error) {
         console.error(error);
