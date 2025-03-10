@@ -10,7 +10,7 @@ export const createTables = async () => {
     const db = await getDB();
     try {
         await db.execAsync(`
-            CREATE TABLE IF NOT EXISTS earnings (
+            CREATE TABLE IF NOT EXISTS earnings_new (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 amount REAL NOT NULL,
                 description TEXT,
@@ -40,7 +40,7 @@ export const addEarnings = async (amount: number, description: string) => {
     const db = await getDB();
     try {
         await db.runAsync(
-            `INSERT INTO earnings (amount, description) VALUES (?, ?)`,
+            `INSERT INTO earnings_new (amount, description) VALUES (?, ?)`,
             [amount, description]
         );
         console.log("Earnings added successfully");
@@ -53,10 +53,10 @@ export const addEarnings = async (amount: number, description: string) => {
 export const getEarnings = async () => {
     const db = await getDB();
     try {
-        const results = await db.getAllAsync(`SELECT * FROM earnings;`);
+        const results = await db.getAllAsync(`SELECT * FROM earnings_new;`);
         const formattedResults = results.map((row: any) => ({
             id: row.id,
-            amount: row.AMOUNT,  // SQLite returns uppercase keys
+            amount: row.amount,  // SQLite returns uppercase keys
             description: row.description,
             date: row.date,
           }));
