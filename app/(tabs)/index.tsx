@@ -138,6 +138,7 @@ const HomeScreen = () => {
                 </View>
               </View>
             </View>
+            <Text style={styles.notice}>* Pull down to Refresh </Text>
           </>
         ) : null}
 
@@ -398,6 +399,13 @@ const styles = StyleSheet.create({
     marginTop: 10,
     color: "#999",
     fontSize: 16,
+  },
+  notice :{
+
+    color:"white",
+    fontSize:10,
+    marginBottom:15,
+
   },
 });
 
