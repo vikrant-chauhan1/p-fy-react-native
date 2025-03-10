@@ -115,7 +115,7 @@ const ExpensesScreen = () => {
               <Picker
                 selectedValue={category}
                 onValueChange={(itemValue) => setCategory(itemValue)}
-                style={styles.picker}
+                
               >
                 <Picker.Item label="Compulsory" value="Compulsory" />
                 <Picker.Item label="Miscellaneous" value="Miscellaneous" />
@@ -155,7 +155,7 @@ const ExpensesScreen = () => {
                   </Text>
                   <View style={styles.metaDataRow}>
                     <View style={styles.categoryBadge}>
-                      <Text style={styles.categoryText}>{item.category}</Text>
+                      <Text >{item.category}</Text>
                     </View>
                     <Text style={styles.expenseTime}>{new Date(item.date).toLocaleDateString()}</Text>
 

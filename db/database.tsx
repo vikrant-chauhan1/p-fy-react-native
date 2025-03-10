@@ -34,6 +34,8 @@ export const createTables = async () => {
     } 
 };
 
+// EARNINGS ROUTES
+
 export const addEarnings = async (amount: number, description: string) => {
     const db = await getDB();
     try {
@@ -67,6 +69,21 @@ export const getEarnings = async () => {
     }
 };
 
+export const deleteEarning= async(id:number)=>{
+    const db = await getDB();
+    try {
+        await db.runAsync( `DELETE FROM earnings WHERE id=(?)`,[id]);
+        console.log("Earning deleted sucessfully")
+    } catch (error) {
+        console.error(error);
+        throw error;
+        
+    }
+}
+
+// EXPENSES ROUTES
+
+
 export const addExpenses = async(amount :number,category :string,description:string)=>{
     const db = await getDB();
     try {
@@ -92,4 +109,16 @@ export const getExpenses = async()=>{
         throw error;
         
     }
+}
+
+export const deleteExpense = async(id:number)=>{
+    const db = await getDB();
+    try {
+        await db.runAsync(`DELETE FROM expenses WHERE id=(?)`,[id]);
+        console.log("expense deleted successfully")
+    } catch (error) {
+        console.log(error)
+        throw error;        
+    }
+
 }
